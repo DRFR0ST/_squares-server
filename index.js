@@ -53,6 +53,7 @@ wsServer.on('request', function(request) {
   // we need to know client index to remove them on 'close' event
   var index = clients.push(connection) - 1;
   console.log((new Date()) + ' Connection accepted.');
+  sendMessageToAll({user: {username: "Server", color: "#BD0000"}, content: "User " + index + " joined the chat."});
   // send back chat history
   if (history.length > 0) {
     connection.send(
@@ -75,7 +76,14 @@ wsServer.on('request', function(request) {
   connection.on('close', function(connection) {
       console.log((new Date()) + " Peer "
           + connection.remoteAddress + " disconnected.");
+      sendMessageToAll({user: {username: "Server", color: "#BD0000"}, content: "User " + index + " left the chat."});
       // remove user from the list of connected clients
       clients.splice(index, 1);
   });
 });
+
+function sendMessageToAll(message) {
+  for (var i=0; i < clients.length; i++) {
+    clients[i].send(JSON.stringify(message));
+  }
+}
