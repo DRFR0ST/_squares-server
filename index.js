@@ -52,6 +52,9 @@ wsServer.on('request', function(request) {
   var connection = request.accept(null, request.origin); 
   // we need to know client index to remove them on 'close' event
   var index = clients.push(connection) - 1;
+  for(var story = 0; story < history.length; story++) {
+    connection.send(history[story]);
+  }
   console.log((new Date()) + ' Connection accepted.');
   sendMessageToAll({user: {username: "Server", color: "#BD0000"}, content: "User " + index + " joined the chat."});
   // send back chat history
