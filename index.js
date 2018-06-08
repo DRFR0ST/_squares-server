@@ -56,21 +56,19 @@ wsServer.on('request', function(request) {
     connection.send(history[story]);
   }
   console.log((new Date()) + ' Connection accepted.');
-  sendMessageToAll({user: {username: "Server", color: "#BD0000"}, content: "User " + index + " joined the chat."});
+  sendMessageToAll({user: {username: "Server", color: "#BD0000"}, content: "User " + index + " joined the chat."}, {exclude: connection});
   // send back chat history
-  if (history.length > 0) {
-    connection.send(
-        { type: 'history', data: history} )
-  }
+
   // user sent some message
   connection.on('message', function(message) {
 
         // we want to keep history of all sent messages
-        history.push(message);
-        history = history.slice(-100);
+
         // broadcast message to all connected clients
         var json = message['utf8Data'];
-        console.log(json);
+        console.log("New message: " + JSON.stringify(json));
+        history.push(JSON.stringify(json));
+        history = history.slice(-100);
         for (var i=0; i < clients.length; i++) {
           clients[i].send(JSON.stringify(json));
         }
@@ -85,8 +83,9 @@ wsServer.on('request', function(request) {
   });
 });
 
-function sendMessageToAll(message) {
+function sendMessageToAll(message, settings = {exclude: ""}) {
   for (var i=0; i < clients.length; i++) {
-    clients[i].send(JSON.stringify(message));
+    if(clients[i] !== settings.exclude)
+      clients[i].send(JSON.stringify(message));
   }
 }
